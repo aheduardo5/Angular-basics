@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CatalogService } from './catalog.service';
 import { Product } from './product';
+import { Observable, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-catalog',
@@ -9,15 +11,21 @@ import { Product } from './product';
   styleUrls: ['./catalog.component.css'],
 })
 export class CatalogComponent {
-  get products(): Product[] {
-    const products = this.catalogService.products;
+  products$ = this.catalogService.products$;
+  orderBy$: Observable<string | null> = this.route.queryParamMap.pipe(
+    map((queryParamMap) => queryParamMap.get('orderBy'))
+  );
 
-    if (this.route.snapshot.queryParamMap.get('orderBy') === 'price') {
-      products.sort((a, b) => a.price - b.price);
-    }
-
-    return products;
-  }
+  orderedProducts$: Observable<Product[]> = combineLatest([
+    this.products$,
+    this.orderBy$,
+  ]).pipe(
+    map(([products, orderBy]) =>
+      orderBy === 'price'
+        ? [...products].sort((a, b) => a.price - b.price)
+        : products
+    )
+  );
   constructor(
     private catalogService: CatalogService,
     private route: ActivatedRoute

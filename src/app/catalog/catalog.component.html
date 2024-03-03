@@ -1,7 +1,4 @@
 <a routerLink="./" [queryParams]="{ orderBy: 'price' }">Ordenar por precio</a>
 <div class="catalog-grid">
-  <app-catalog-product
-    *ngFor="let product of products"
-    [product]="product"
-  ></app-catalog-product>
+  <app-catalog-product *ngFor="let product of orderedProducts$ | async" [product]="product"></app-catalog-product>
 </div>
